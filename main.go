@@ -17,7 +17,7 @@ import (
 	"github.com/eBay/fabio/ui"
 )
 
-var version = "1.0.3"
+var version = "1.0.4-issue-10-forward-header"
 
 func main() {
 	var cfg string
@@ -67,14 +67,15 @@ func main() {
 		log.Fatal("[FATAL] ", err)
 	}
 
-	consul.Addr = consulAddr;
-	consul.URL = consulURL;
+	consul.Addr = consulAddr
+	consul.URL = consulURL
 
 	dc, err := consul.Datacenter()
 	if err != nil {
 		log.Fatal("[FATAL] ", err)
 	}
 
+	log.Printf("[INFO] Using local address %q", proxyLocalIP)
 	log.Printf("[INFO] Using routing strategy %q", proxyStrategy)
 	log.Printf("[INFO] Connecting to consul on %q in datacenter %q", consulAddr, dc)
 	log.Printf("[INFO] Consul can be reached via %q", consulURL)
@@ -95,7 +96,7 @@ func main() {
 		}).Dial,
 	}
 
-	proxy := route.NewProxy(tr, proxyHeaderClientIP, proxyHeaderTLS, proxyHeaderTLSValue)
+	proxy := route.NewProxy(tr, proxyLocalIP, proxyHeaderClientIP, proxyHeaderTLS, proxyHeaderTLSValue)
 	listen(proxyAddr, proxyShutdownWait, proxy)
 }
 

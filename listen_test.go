@@ -43,7 +43,7 @@ func TestGracefulShutdown(t *testing.T) {
 	laddr := "127.0.0.1:57777"
 	go func() {
 		defer wg.Done()
-		listen(laddr, 250*time.Millisecond, route.NewProxy(http.DefaultTransport, "", "", ""))
+		listen(laddr, 250*time.Millisecond, route.NewProxy(http.DefaultTransport, "", "", "", ""))
 	}()
 
 	// trigger shutdown after some time

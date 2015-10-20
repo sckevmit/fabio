@@ -1,5 +1,10 @@
 ## Changelog
 
+### WIP
+
+* Add support for `Forwarded` and `X-Forwarded-For` header
+* Add `proxy.localip` to set proxy ip address for headers
+
 ### [v1.0.3](https://github.com/eBay/fabio/releases/tag/v1.0.3) - 25 Oct 2015
 
  * Add Docker support and official Docker image `magiconair/fabio`

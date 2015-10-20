@@ -1,6 +1,7 @@
 package main
 
 import (
+	"net"
 	"runtime"
 	"time"
 
@@ -9,6 +10,7 @@ import (
 
 var (
 	proxyAddr           = ":9999"
+	proxyLocalIP        = localIP()
 	proxyMaxConn        = 10000
 	proxyRoutes         = ""
 	proxyStrategy       = "rnd"
@@ -38,6 +40,7 @@ func loadConfig(filename string) error {
 	}
 
 	proxyAddr = p.GetString("proxy.addr", proxyAddr)
+	proxyLocalIP = p.GetString("proxy.localip", proxyLocalIP)
 	proxyMaxConn = p.GetInt("proxy.maxconn", proxyMaxConn)
 	proxyRoutes = p.GetString("proxy.routes", proxyRoutes)
 	proxyStrategy = p.GetString("proxy.strategy", proxyStrategy)
@@ -60,4 +63,20 @@ func loadConfig(filename string) error {
 	uiAddr = p.GetString("ui.addr", uiAddr)
 
 	return nil
+}
+
+// localIP tries to determine a non-loopback address for the local machine
+func localIP() string {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return ""
+	}
+	for _, addr := range addrs {
+		if ipnet, ok := addr.(*net.IPNet); ok && ipnet.IP.IsGlobalUnicast() {
+			if ipnet.IP.To4() != nil || ipnet.IP.To16() != nil {
+				return ipnet.IP.String()
+			}
+		}
+	}
+	return ""
 }

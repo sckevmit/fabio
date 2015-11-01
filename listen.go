@@ -2,6 +2,8 @@ package main
 
 import (
 	"crypto/tls"
+	"crypto/x509"
+	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -36,14 +38,16 @@ func listen(addrs string, wait time.Duration, h http.Handler) {
 			continue
 		}
 
-		p := semicolons.Split(addr, 4)
+		p := semicolons.Split(addr, 5)
 		switch len(p) {
 		case 1:
 			go listenAndServe(p[0], h)
 		case 2:
-			go listenAndServeTLS(p[0], p[1], p[1], h)
+			go listenAndServeTLS(p[0], p[1], p[1], "", h)
 		case 3:
-			go listenAndServeTLS(p[0], p[1], p[2], h)
+			go listenAndServeTLS(p[0], p[1], p[2], "", h)
+		case 4:
+			go listenAndServeTLS(p[0], p[1], p[2], p[3], h)
 		default:
 			log.Fatal("[FATAL] Invalid address format ", addr)
 		}
@@ -69,7 +73,7 @@ func listenAndServe(addr string, h http.Handler) {
 }
 
 // listenAndServeTLS starts an HTTPS server with the given certificate.
-func listenAndServeTLS(addr, certFile, keyFile string, h http.Handler) {
+func listenAndServeTLS(addr, certFile, keyFile, clientAuthFile string, h http.Handler) {
 	log.Printf("[INFO] HTTPS proxy listening on %s with certificate %s", addr, certFile)
 	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
 	if err != nil {
@@ -80,6 +84,21 @@ func listenAndServeTLS(addr, certFile, keyFile string, h http.Handler) {
 		NextProtos:   []string{"http/1.1"},
 		Certificates: []tls.Certificate{cert},
 	}
+
+	if clientAuthFile != "" {
+		pemBlock, err := ioutil.ReadFile(clientAuthFile)
+		if err != nil {
+			log.Fatal("[FATAL] ", err)
+		}
+		pool := x509.NewCertPool()
+		if !pool.AppendCertsFromPEM(pemBlock) {
+			log.Fatal("[FATAL] failed to add client auth certs")
+		}
+		config.ClientCAs = pool
+		config.ClientAuth = tls.RequireAndVerifyClientCert
+		log.Printf("[INFO] Client certificate authentication enabled on %s with certificates from %s", addr, clientAuthFile)
+	}
+
 	srv := &http.Server{Addr: addr, TLSConfig: config, Handler: h}
 
 	ln, err := net.Listen("tcp", addr)

@@ -5,3 +5,4 @@ fabio.sublime-*
 *.pem
 .DS_Store
 *.out
+*.p12

@@ -17,7 +17,7 @@ import (
 	"github.com/eBay/fabio/ui"
 )
 
-var version = "1.0.3"
+var version = "1.0.4-issue-8-ssl-client-auth"
 
 func main() {
 	var cfg string
@@ -67,8 +67,8 @@ func main() {
 		log.Fatal("[FATAL] ", err)
 	}
 
-	consul.Addr = consulAddr;
-	consul.URL = consulURL;
+	consul.Addr = consulAddr
+	consul.URL = consulURL
 
 	dc, err := consul.Datacenter()
 	if err != nil {

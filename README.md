@@ -25,6 +25,7 @@ instances.
 * Hot-reloading of routing table through backend watchers
 * Round robin and random distribution
 * [Traffic Shaping](#Traffic Shaping) (send 5% of traffic to new instances)
+* SSL client certificate authentication support
 * Graphite metrics
 * Request tracing
 * WebUI
